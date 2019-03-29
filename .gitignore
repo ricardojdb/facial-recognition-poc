@@ -1,0 +1,15 @@
+.ipynb_checkpoints/*
+*/.ipynb_checkpoints/*
+*/*/.ipynb_checkpoints/*
+
+*/__pycache__/*
+*/*/__pycache__/*
+
+models/*
+!models/.keep
+
+dockers/*/models/*
+!dockers/*/models/.keep
+
+dockers/*/images/*
+!dockers/*/images/.keep
