@@ -2,7 +2,7 @@
 # docker build -t knn .
 FROM python:3.6.8-slim
 
-# LABEL 'docker run --name=knn-service --rm -v C:\Users\rdiazbri\Documents\proyectos\facial-recognition\dockers\knn:/app -p 7000:7000 knn'
+# LABEL "docker run --name=knn-service --rm --link=vggface-service -dit -v /home/deepai/Documents/projects/facial-recognition-poc/dockers/knn:/app -p 7000:7000 knn"
 
 # Create app folder
 RUN mkdir /app
@@ -14,7 +14,7 @@ WORKDIR /app
 COPY requirements.txt /app
 
 # Local directory as a volume
-VOLUME C:\Users\rdiazbri\Documents\proyectos\facial-recognition\dockers\knn:/app
+VOLUME /home/deepai/Documents/projects/facial-recognition-poc/dockers/knn:/app
 
 # Install any needed packages specified in requirements.txt
 RUN pip install -r requirements.txt
