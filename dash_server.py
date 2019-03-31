@@ -2,7 +2,12 @@ import dash
 import dash_table
 import pandas as pd
 
-data = {"Name": ["Ricardo", "Jaspers", "Hugo"], "Date":["28/03/2019", "28/03/2019", "28/03/2019"] , "Time": ["3:41", "3:41", "3:41"]}
+data = {
+"Photo": ["None", "None", "None"]
+"Name": ["Ricardo", "Jaspers", "Hugo"], 
+"First seen":["28/03/2019 10:32", "28/03/2019 10:32", "28/03/2019 10:32"], 
+"Last seen":["28/03/2019 11:32", "28/03/2019 11:32", "28/03/2019 11:32"],
+}
 
 df = pd.DataFrame(data)
 
