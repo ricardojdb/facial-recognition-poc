@@ -3,7 +3,7 @@ import dash_table
 import pandas as pd
 
 data = {
-"Photo": ["None", "None", "None"]
+"Photo": ["None", "None", "None"],
 "Name": ["Ricardo", "Jaspers", "Hugo"], 
 "First seen":["28/03/2019 10:32", "28/03/2019 10:32", "28/03/2019 10:32"], 
 "Last seen":["28/03/2019 11:32", "28/03/2019 11:32", "28/03/2019 11:32"],
