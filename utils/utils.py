@@ -1,6 +1,7 @@
 import numpy as np
 import base64
 import cv2
+import os 
 
 def draw_box(img, label, dist, box):
     x,y,w,h = box
@@ -27,3 +28,14 @@ def encode_img(img):
     retval, buffer = cv2.imencode('.jpg', img)
     img_str = base64.b64encode(buffer)
     return img_str
+
+def get_photos(base_path):
+    photos = {}
+
+    for path in os.listdir(base_path):
+        if path.endswith("jpg") or path.endswith("png") or path.endswith("jpeg"):
+            image_path = os.path.join(base_path, path)
+            encoded_image = base64.b64encode(open(image_path, 'rb').read()).decode('utf-8')
+            photos[path[:-4]] = encoded_image
+            
+    return photos

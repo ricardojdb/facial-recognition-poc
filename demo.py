@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from datetime import datetime
 from io import BytesIO
 import numpy as np
 import requests
@@ -8,14 +8,17 @@ import cv2
 import os
 
 from utils import utils
+from utils import sql_utils
 
 net = cv2.dnn.readNetFromCaffe("models/prototxt.txt", "models/res10_300x300_ssd_iter_140000.caffemodel")
 host = "192.168.8.100"
 
+sql_utils.create_mysql_table()
+recog_dict = {}
 cap = cv2.VideoCapture(0)
 while 1:
     ret, frame = cap.read()
-    
+        
     if not ret:
         break
         
@@ -54,9 +57,20 @@ while 1:
 
             r = requests.get(f'http://{host}:7000/predict/', data=img_str)
 
-            r_dict = dict(r.json())
-
-            img = utils.draw_box(img, r_dict['label'], r_dict['dist'], (startX,startY,endX-startX,endY-startY))  
+            outputs = dict(r.json())
+            
+            img = utils.draw_box(img, outputs['label'], outputs['dist'], (startX,startY,endX-startX,endY-startY))
+            if outputs['label'] == "Unknown": continue
+                
+            if outputs['label'] in recog_dict:
+                recog_dict[outputs['label']][2] = datetime.now().strftime('%m/%d/%y %H:%M:%S')
+            else:
+                time = datetime.now().strftime('%m/%d/%y %H:%M:%S')
+                recog_dict[outputs['label']] = [outputs['label'], time, time]
+            
+    
+    data_list = list(recog_dict.values())
+    sql_utils.insert_mysql_table(data_list)
     
     cv2.imshow('img',img)
     k = cv2.waitKey(32)
