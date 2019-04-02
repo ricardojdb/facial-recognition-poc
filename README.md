@@ -7,6 +7,14 @@ In this project we created a facial recognition system using Docker and Kubernet
 * Facial Recognition - Pytorch [VGGFace2](http://www.robots.ox.ac.uk/~albanie/pytorch-models.html)
 * Face Detection - Caffee [SSD](https://github.com/thegopieffect/computer_vision/tree/master/CAFFE_DNN)
 
+## Demo:
+
+Change the `host` of your docker API, select the camera to use and run:
+
+```
+python demo.py
+```
+
 ## Dashboard:
 
 To run the dashboard, make sure you change create a MySQL DB, change the credentials in the script and use:
