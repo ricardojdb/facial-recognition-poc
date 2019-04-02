@@ -11,19 +11,25 @@ from utils import utils
 from utils import sql_utils
 
 net = cv2.dnn.readNetFromCaffe("models/prototxt.txt", "models/res10_300x300_ssd_iter_140000.caffemodel")
-host = "192.168.8.100"
 
 sql_utils.create_mysql_table()
 recog_dict = {}
-cap = cv2.VideoCapture(0)
-while 1:
-    ret, frame = cap.read()
-        
+# Start thread to capture and show the stream.
+video_path = 0 
+video_capture = utils.WebcamVideoStream(video_path).start()
+
+host = "localhost"
+
+while True:
+    # Collect width and height from the stream
+    h, w = int(video_capture.h), int(video_capture.w)
+    # Read the current frame
+    ret, frame = video_capture.read()
+
     if not ret:
         break
         
     img = np.copy(frame)
-    (h, w) = frame.shape[:2]
     
     # construct a blob from the image
     blob = cv2.dnn.blobFromImage(cv2.resize(img, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
@@ -32,7 +38,7 @@ while 1:
     # faces in the input image
     net.setInput(blob)
     detections = net.forward()
-    
+    data = []
     # loop over the detections
     for i in range(0, detections.shape[2]):
         # extract the confidence (i.e., probability) associated with the
@@ -58,8 +64,9 @@ while 1:
             r = requests.get(f'http://{host}:7000/predict/', data=img_str)
 
             outputs = dict(r.json())
+
+            data.append([outputs['label'], outputs['dist'], (startX,startY,endX-startX,endY-startY)])
             
-            img = utils.draw_box(img, outputs['label'], outputs['dist'], (startX,startY,endX-startX,endY-startY))
             if outputs['label'] == "Unknown": continue
                 
             if outputs['label'] in recog_dict:
@@ -68,14 +75,13 @@ while 1:
                 time = datetime.now().strftime('%m/%d/%y %H:%M:%S')
                 recog_dict[outputs['label']] = [outputs['label'], time, time]
             
-    
+  
     data_list = list(recog_dict.values())
     sql_utils.insert_mysql_table(data_list)
     
-    cv2.imshow('img',img)
-    k = cv2.waitKey(32)
-    if k & 0xFF == ord("q"):
-        break
+    video_capture.data_list = data
         
-cap.release()
+    if video_capture.stopped:
+        break
+
 cv2.destroyAllWindows()        

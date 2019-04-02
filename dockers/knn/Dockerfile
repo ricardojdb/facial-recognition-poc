@@ -2,7 +2,7 @@
 # docker build -t knn .
 FROM python:3.6.8-slim
 
-# LABEL "docker run --name=knn-service --rm --link=vggface-service -dit -v /home/deepai/Documents/projects/facial-recognition-poc/dockers/knn:/app -p 7000:7000 knn"
+# LABEL "docker run --name=knn-service --link=vggface-service --rm -dit -v /home/deepai/Documents/projects/facial-recognition-poc/dockers/knn:/app -p 7000:7000 knn"
 
 # Create app folder
 RUN mkdir /app

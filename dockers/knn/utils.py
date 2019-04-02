@@ -13,7 +13,7 @@ class KnnModel(object):
         self.vgg_host = vgg_host
         self.models_path = models_path
         self.model = self.init_model("knn.pkl")
-        self.label_encoder = self.init_model("label_encoder.pkl")
+        self.label_encoder = self.init_model("id2label.pkl")
     
     def init_model(self, model_name):
         path = os.path.join(self.models_path, model_name)
@@ -25,7 +25,7 @@ class KnnModel(object):
         if dist > 1.05:
             label = "Unknown"
         else:
-            label = self.label_encoder.inverse_transform([label])[0]
+            label = self.label_encoder[label]
         return dist, label 
 
     def model_predict(self, data):
