@@ -1,9 +1,8 @@
-# Use pytorch with cuda to get GPU support
-# docker build -t vggface .
-# if GPU :0.4_cuda9_cudnn7
+# Use pytorch with cuda to get GPU support :0.4_cuda9_cudnn7
 FROM pytorch/pytorch
 
-# LABEL 'docker run --name=vggface-service --rm --dt -v /home/deepai/Documents/projects/facial-recognition-poc/dockers/vggface:/app -p 7001:7000 vggface:gpu'
+LABEL GPU.run="docker run --runtime=nvidia --name=vggface-service --rm -dt -v <PATH>:/app -p 7001:7000 vggface" \
+	  CPU.run="docker run --name=vggface-service --rm --dt -v <PATH>:/app -p 7001:7000 vggface"
 
 # Create app folder
 RUN mkdir /app
@@ -15,7 +14,7 @@ WORKDIR /app
 COPY requirements.txt /app
 
 # Local directory as a volume
-VOLUME /home/deepai/Documents/projects/facial-recognition-poc/dockers/vggface:/app
+VOLUME /app
 
 # Install any needed packages specified in requirements.txt
 RUN pip install -r requirements.txt
