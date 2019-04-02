@@ -12,7 +12,7 @@ def draw_box(img, label, dist, box):
     font_scale = 0.8
     thickness = 6
     font_type = cv2.FONT_HERSHEY_DUPLEX
-    text = label #+ ' {:.3}'.format(dist)
+    text = label + ' {:.3}'.format(dist)
     
     text_size = cv2.getTextSize(text, font_type, font_scale, thickness)[0]
     
