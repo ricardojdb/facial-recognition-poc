@@ -10,14 +10,14 @@ fi
 
 if [[ "$(sudo docker images -q vggface:gpu 2> /dev/null)" != "" ]]
 then
-echo Image vggface:gpu already built
+echo Image vggface already built
 else
 sudo docker build -t vggface:gpu vggface/ 
 fi
 
 # Run the vggface container locally
 sudo docker run --runtime=nvidia --name=vggface-service --rm \
--dit -v /home/deepai/Documents/projects/facial-recognition-poc/dockers/vggface:/app vggface:gpu
+-dit -v /home/deepai/Documents/projects/facial-recognition-poc/dockers/vggface:/app vggface
 
 # Run the container in the port 7000
 sudo docker run --name=knn-service --rm --link=vggface-service \
