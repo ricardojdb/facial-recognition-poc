@@ -1,8 +1,8 @@
-# Use pytorch with cuda to get GPU support :0.4_cuda9_cudnn7
+# Use pytorch image with Cuda for GPU support :0.4_cuda9_cudnn7
 FROM pytorch/pytorch
 
-LABEL GPU.run="docker run --runtime=nvidia --name=vggface-service --rm -dt -v <PATH>:/app -p 7001:7000 vggface" \
-	  CPU.run="docker run --name=vggface-service --rm --dt -v <PATH>:/app -p 7001:7000 vggface"
+LABEL GPU.run="docker run --runtime=nvidia --name=vggface-service --rm -dit -v <PATH>:/app -p 7001:7000 vggface" \
+	  CPU.run="docker run --name=vggface-service --rm -dit -v <PATH>:/app -p 7001:7000 vggface"
 
 # Create app folder
 RUN mkdir /app
