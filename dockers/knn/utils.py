@@ -22,7 +22,7 @@ class KnnModel(object):
     def who_is_it(self, embed):   
         dist, label = self.model.kneighbors([embed])
         dist, label = dist[0,0], label[0,0]
-        if dist > 1.05:
+        if dist > 1:
             label = "Unknown"
         else:
             label = self.label_encoder[label]
