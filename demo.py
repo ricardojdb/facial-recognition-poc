@@ -47,7 +47,7 @@ while True:
 
         # filter out weak detections by ensuring the `confidence` is
         # greater than the minimum confidence
-        if confidence > 0.3:
+        if confidence > 0.2:
             # compute the (x, y)-coordinates of the bounding box for the
             # object
             box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
@@ -70,9 +70,9 @@ while True:
             if outputs['label'] == "Unknown": continue
                 
             if outputs['label'] in recog_dict:
-                recog_dict[outputs['label']][2] = datetime.now().strftime('%m/%d/%y %H:%M:%S')
+                recog_dict[outputs['label']][2] = datetime.now().strftime('%d/%m/%y %H:%M:%S')
             else:
-                time = datetime.now().strftime('%m/%d/%y %H:%M:%S')
+                time = datetime.now().strftime('%d/%m/%y %H:%M:%S')
                 recog_dict[outputs['label']] = [outputs['label'], time, time]
             
   
