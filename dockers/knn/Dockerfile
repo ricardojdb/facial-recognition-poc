@@ -9,7 +9,7 @@ RUN mkdir /app
 # Set the working directory to /app
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
+# Copy the requirements.txt file into the container at /app
 COPY requirements.txt /app
 
 # Local directory as a volume
