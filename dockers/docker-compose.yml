@@ -1,0 +1,29 @@
+version: '3'
+services:
+  vggface:
+    container_name: vggface-service
+    image: vggface:latest
+    ports:
+     - "7001:7000"
+    volumes:
+     - ./vggface:/app
+    networks:
+      net:
+        ipv4_address: 172.28.0.2
+  knn:
+    container_name: knn-service
+    image: knn:latest
+    ports:
+     - "7000:7000"
+    volumes:
+     - ./knn:/app
+    networks:
+      net:
+        ipv4_address: 172.28.0.3
+
+networks:
+  net:
+    ipam:
+      driver: default
+      config:
+       - subnet: 172.28.0.0/16
