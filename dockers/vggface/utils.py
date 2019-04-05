@@ -18,6 +18,15 @@ class VggFace2(object):
         self.model = self.init_model()
 
     def init_model(self):
+        """
+        Initializes the machine learning model.
+
+        Returns
+        -------
+        model: object
+            Pre-trained model used
+            to make predictions.
+        """
         model_name = "resnet50_ft_dag.pth"
         model = resnet50_ft_dag(os.path.join(self.model_path, model_name))
         model.to(self.device)
@@ -25,9 +34,36 @@ class VggFace2(object):
         return model
     
     def decode_img(self, data):
+        """
+        Decodes the encoded data comming from a request.
+
+        Parameters
+        ----------
+        data : bytes
+            Base64 data comming from request.
+
+        Returns
+        -------
+        decoded_data: optional
+            Decoded data into a usable format.
+        """
         return Image.open(BytesIO(base64.b64decode(data)))
 
     def preprocess(self, x, meta):
+        """
+        Prerocess the data into the right format
+        to be feed in to the given model.
+
+        Parameters
+        ----------
+        raw_inputs: optional
+            Raw data to be processed.
+
+        Returns
+        -------
+        inputs: optional
+            Data ready to use in the given model.
+        """
         img = x.resize((224,224))
         img = np.array(img, dtype=np.float32)
         img = img[:,:,::-1]
@@ -41,6 +77,9 @@ class VggFace2(object):
         return output
 
     def predict_embed(self, x):
+        """
+        Performs the forward pass of the model
+        """
         embed, _  = self.model(x)
 
         if embed.is_cuda:
@@ -51,6 +90,23 @@ class VggFace2(object):
         return self.l2_normalize(embed)
 
     def model_predict(self, data):
+        """
+        Decodes and preprocess the data, uses the 
+        pretrained model to make predictions and 
+        returns a well formatted json output.
+
+        Parameters
+        ----------
+        data: bytes
+            Base64 data comming from request.
+
+        Returns
+        -------
+        outputs: json
+            A json response that contains the output
+            from the pre-trained model.
+
+        """
         img = self.decode_img(data)
         img = self.preprocess(img, self.model.meta)
         preds = self.predict_embed(img)   
