@@ -71,7 +71,7 @@ class KnnModel(object):
             A json response that contains the output
             from the pre-trained model.
         """
-        preds = requests.get(f'http://{self.vgg_host}/predict/', data=data).json()["embedding"]
+        preds = requests.get(f'http://{self.vgg_host}/predict/', params={"data":data}).json()["embedding"]
         dist, label = self.who_is_it(preds)
 
         out = {'label':label, 'dist':'{:.3f}'.format(dist)}
