@@ -61,7 +61,7 @@ while True:
             
             img_str = utils.encode_img(roi_color_rgb)
 
-            r = requests.get(f'http://{host}:7000/predict/', data=img_str)
+            r = requests.get(f'http://{host}:7000/predict/', params={"data":img_str})
 
             outputs = dict(r.json())
 
