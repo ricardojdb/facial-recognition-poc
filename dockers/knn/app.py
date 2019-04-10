@@ -12,7 +12,7 @@ knn = utils.KnnModel("models/", "172.28.0.2:7000")
 @app.route('/predict/',methods=['GET','POST'])
 def predict():
     # Obtain the data from the request
-    data = request.get_data()
+    data = request.args.get('data')
     # Runs the model and returns the outputs in a json format
     output = knn.model_predict(data)
     return output
