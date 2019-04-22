@@ -21,9 +21,10 @@ video_capture = utils.WebcamVideoStream(video_path).start()
 host = "localhost"
 
 while True:
-    # Collect width and height from the stream
+    # collect width and height from the stream
     h, w = int(video_capture.h), int(video_capture.w)
-    # Read the current frame
+    
+    # read the current frame
     ret, frame = video_capture.read()
 
     if not ret:
@@ -32,14 +33,14 @@ while True:
     img = np.copy(frame)
     
     # construct a blob from the image
-    blob = cv2.dnn.blobFromImage(cv2.resize(img, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
+    blob = cv2.dnn.blobFromImage(cv2.resize(img, (300, 300)), 1.0, 
+        (300, 300), (104.0, 177.0, 123.0))
  
-    # apply OpenCV's deep learning-based face detector to localize
-    # faces in the input image
+    # apply OpenCV's face detector in the input image
     net.setInput(blob)
     detections = net.forward()
     data = []
-    # loop over the detections
+
     for i in range(0, detections.shape[2]):
         # extract the confidence (i.e., probability) associated with the
         # prediction
@@ -48,27 +49,33 @@ while True:
         # filter out weak detections by ensuring the `confidence` is
         # greater than the minimum confidence
         if confidence > 0.2:
-            # compute the (x, y)-coordinates of the bounding box for the
-            # object
+            # compute the (x, y)-coordinates of the bounding box 
             box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
             (startX, startY, endX, endY) = box.astype("int")
 
+            # cut face from the frame
             roi_color = frame[startY:endY, startX:endX]
-            
-            if not roi_color.size: continue
-                
-            roi_color_rgb = cv2.cvtColor(roi_color, cv2.COLOR_RGB2BGR)
-            
-            img_str = utils.encode_img(roi_color_rgb)
 
+            # if no face is detected conitnue to the next one
+            if not roi_color.size: continue
+
+            # encode image to base64
+            img_str = utils.encode_img(roi_color)
+
+            # send the image in the data param
             r = requests.get(f'http://{host}:7000/predict/', params={"data":img_str})
 
+            # extract json output
             outputs = dict(r.json())
 
+            # gather the data that's going to be passed to
+            # the WebcamVideoStream to plot the bounding box
             data.append([outputs['label'], outputs['dist'], (startX,startY,endX-startX,endY-startY)])
             
+            # if label is Unknown don't add the data to the MySQL database
             if outputs['label'] == "Unknown": continue
-                
+            
+            # create or update the data in the recognition dict
             if outputs['label'] in recog_dict:
                 recog_dict[outputs['label']][2] = datetime.now().strftime('%d/%m/%y %H:%M:%S')
             else:
