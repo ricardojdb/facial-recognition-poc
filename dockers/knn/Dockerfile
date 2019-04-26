@@ -1,7 +1,8 @@
 # Use pytorch with cuda to get GPU support
 FROM python:3.6.8-slim
 
-LABEL run="docker run --name=knn-service --link=vggface-service --rm -dit -v <PATH>:/app -p 7000:7000 knn"
+LABEL Name="facial-recognition-poc" Version="0.0.1" maintainer="rjoseb11@gmail.com"\
+      run="docker run --name=knn-service --link=vggface-service --rm -dit -v <PATH>:/app -p 7000:7000 knn"
 
 # Create app folder
 RUN mkdir /app

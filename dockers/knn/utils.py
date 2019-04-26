@@ -5,6 +5,7 @@ import pickle
 import base64
 import json
 import os 
+import re
 
 global device
 
@@ -73,7 +74,7 @@ class KnnModel(object):
         """
         preds = requests.get(f'http://{self.vgg_host}/predict/', params={"data":data}).json()["embedding"]
         dist, label = self.who_is_it(preds)
-
+        label = re.sub('[0-9]', '', label)
         out = {'label':label, 'dist':'{:.3f}'.format(dist)}
 
         return json.dumps(out)
