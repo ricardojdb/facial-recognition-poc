@@ -9,7 +9,7 @@ import cv2
 import os
 
 def encode_img(img):
-    retval, buffer = cv2.imencode('.jpg', img)
+    _, buffer = cv2.imencode('.jpg', img)
     img_str = base64.b64encode(buffer)
     return img_str
 
@@ -26,8 +26,10 @@ for img_path in tqdm(os.listdir("images/")):
     if img is None: continue  
 
     img_str = encode_img(img)
-    r = requests.get(f"http://{host}:7001/predict/", data=img_str, timeout=5)
-    embed = r.json()["embedding"]
+    r = requests.get(f"http://{host}:7001/predict/", 
+            params={"data":img_str}, timeout=5)
+    r_json = r.json()
+    embed = r_json["embedding"]
 
     id2label[i] = img_path[:-4]
     i += 1
