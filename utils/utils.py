@@ -28,6 +28,16 @@ def draw_box(img, label, dist, box):
     
     return img
 
+def get_wide_box(w, h, xmin, ymin, xmax, ymax):
+    """
+    Expands the boundary face box
+    """
+    xmin_wide = max(xmin-(xmax-xmin)//4, 0)
+    ymin_wide = max(ymin-(ymax-ymin)//4, 0)
+    xmax_wide = min(xmax+(xmax-xmin)//6, w-1)
+    ymax_wide = min(ymax+(ymax-ymin)//6, h-1)
+    return xmin_wide, ymin_wide, xmax_wide, ymax_wide
+
 def encode_img(img):
     retval, buffer = cv2.imencode('.jpg', img)
     img_str = base64.b64encode(buffer)
