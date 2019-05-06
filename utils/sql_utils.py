@@ -26,3 +26,16 @@ def insert_mysql_table(data_list):
         conn.commit()
 
     conn.close()
+
+def delete_mysql_table():
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="admin",
+        passwd="admin",
+        database="facedb",
+    ) 
+    c = conn.cursor()
+    c.execute("DELETE FROM recognition")
+
+    conn.commit()
+    conn.close()

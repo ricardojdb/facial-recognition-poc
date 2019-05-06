@@ -10,9 +10,13 @@ import os
 from utils import utils
 from utils import sql_utils
 
-net = cv2.dnn.readNetFromCaffe("models/prototxt.txt", "models/res10_300x300_ssd_iter_140000.caffemodel")
+net = cv2.dnn.readNetFromCaffe( 
+    "models/prototxt.txt", 
+    "models/res10_300x300_ssd_iter_140000.caffemodel")
 
 sql_utils.create_mysql_table()
+sql_utils.delete_mysql_table()
+
 recog_dict = {}
 # Start thread to capture and show the stream.
 video_path = 0
