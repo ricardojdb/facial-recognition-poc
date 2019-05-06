@@ -4,15 +4,44 @@ import numpy as np
 import traceback
 import base64
 import cv2
+import sys
 import os 
+
+global logos
+
+logos = [cv2.imread("C:\\Users\\rdiazbri\\Documents\\proyectos\\facial-recognition-poc\\logos\\everis.png")]
+name2logo = {"Ricardo Diaz": 0, 
+             "Jose Sosa": 0, 
+             "Hugo Castro": 0, 
+             "Jaspers": 0}
+
+def draw_logo(img, label, logo_x, logo_y, logo_w, logo_h):
+    logo_id = name2logo.get(label, None)
+    if logo_id is None:
+        return img
+    logo = logos[logo_id]
+    if logo is None:
+        return img
+    logo = cv2.resize(logo, (logo_w , logo_h))
+
+    logo_gray = cv2.cvtColor(logo,cv2.COLOR_BGR2GRAY)
+    mask = (logo_gray<100)
+
+    logo_ymin = int(logo_y+2)
+    logo_xmin = int(logo_x-5)
+    true_h,true_w, _ = img[logo_ymin:logo_ymin+logo_h, logo_xmin:logo_xmin+logo_w].shape
+    img[logo_ymin:logo_ymin+logo_h, logo_xmin:logo_xmin+logo_w] *= np.expand_dims(mask[:true_h,:true_w],-1)
+    img[logo_ymin:logo_ymin+logo_h, logo_xmin:logo_xmin+logo_w] += logo[:true_h,:true_w]
+
+    return img
 
 def draw_box(img, label, dist, box):
     x,y,w,h = box
-    box_color = (242, 223, 132)
+    box_color = (36, 174, 152)
     font_scale = 0.8
-    thickness = 6
+    thickness = 1
     font_type = cv2.FONT_HERSHEY_DUPLEX
-    text = label + ' {:.3}'.format(dist)
+    text = label #+ ' {:.3}'.format(dist)
     
     text_size = cv2.getTextSize(text, font_type, font_scale, thickness)[0]
     
@@ -20,12 +49,14 @@ def draw_box(img, label, dist, box):
     y_text = text_size[1] + int(text_size[1]*0.2)
     
     cv2.rectangle(img, (x,y), (x+w,y+h), box_color, 2)
-    cv2.rectangle(img, (x,y), (x+x_text, y-y_text), box_color, 8)
-    cv2.rectangle(img, (x,y), (x+x_text, y-y_text), box_color, -1)
 
-    cv2.putText(img, text, (x,y), font_type, font_scale, (20,20,20), thickness)
-    cv2.putText(img, text, (x,y), font_type, font_scale, (255,255,255), 1)
-    
+    if label != "Unknown":
+        cv2.rectangle(img, (x,y), (x+x_text, y-y_text), box_color, 8)
+        cv2.rectangle(img, (x,y), (x+x_text, y-y_text), box_color, -1)
+
+        cv2.putText(img, text, (x,y), font_type, font_scale, (255,255,255), thickness)
+        # cv2.putText(img, text, (x,y), font_type, font_scale, (255,255,255), 1)
+        img = draw_logo(img, label, x+x_text+15, y-y_text-10, 60, 41)
     return img
 
 def get_wide_box(w, h, xmin, ymin, xmax, ymax):

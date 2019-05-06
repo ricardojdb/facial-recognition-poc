@@ -9,41 +9,45 @@ import numpy as np
 import mysql.connector
 import json
 
-def speak(msg):
-    print(msg)
+def speech2text_cortana(msg):
     speak = wincl.Dispatch("SAPI.SpVoice")
     speak.Speak(msg)
 
-responses_file = "utils/responses.json"
-
-print("Listening..")
-while True:
-    conn =  mysql.connector.connect(
-            host="localhost",
-            user="admin",
-            passwd="admin",
-            database="facedb")
-
-    df = pd.read_sql("SELECT Name, FirstSeen, max(LastSeen) as LastSeen FROM recognition GROUP BY Name ORDER BY LastSeen desc", conn)
-
+def speak_cortana(name):
+    responses_file = "utils/responses.json"
     messages = json.load(open(responses_file, "rb"))
+    if messages["new_messages"].get(name, 0):
+        speech2text_cortana(messages["new_messages"][name])
+        time_now = datetime.now().strftime('%d/%m/%y %H:%M:%S')
+        messages["log"] = {name: {"message":messages["new_messages"], 
+                                    "time":time_now}}
+        messages["new_messages"].pop(name)
 
-    for i, row in df.iterrows():
-        first_seen = datetime.strptime(row["FirstSeen"], '%d/%m/%y %H:%M:%S')
-        last_seen = datetime.strptime(row["LastSeen"], '%d/%m/%y %H:%M:%S')
+        json.dump(messages, open(responses_file, "w"))
+        return True
+    return False
 
-        difference = (last_seen-first_seen).seconds
+if __name__ == "__main__":
+    print("Listening..")
+    while True:
+        conn =  mysql.connector.connect(
+                host="localhost",
+                user="admin",
+                passwd="admin",
+                database="facedb")
 
-        if difference < 20 and messages["new_messages"].get(row["Name"], 0):
-            name = row["Name"]
-            message = messages["new_messages"][name]
-            time_now = datetime.now().strftime('%d/%m/%y %H:%M:%S')
+        df = pd.read_sql(
+            "SELECT Name, FirstSeen, max(LastSeen) as LastSeen "
+            "FROM recognition GROUP BY Name ORDER BY LastSeen desc", conn)
 
-            speak(message)
-            messages["log"] = {name: {"message":message, 
-                                      "time":time_now}}
-            messages["new_messages"].pop(row["Name"])
-            
-            json.dump(messages, open(responses_file, "w"))
+        for i, row in df.iterrows():
+            first_seen = datetime.strptime(row["FirstSeen"], '%d/%m/%y %H:%M:%S')
+            last_seen = datetime.strptime(row["LastSeen"], '%d/%m/%y %H:%M:%S')
 
-    conn.close()
+            difference = (last_seen-first_seen).seconds
+
+            if difference < 20:
+                name = row["Name"]
+                speak_cortana(name)
+
+        conn.close()
