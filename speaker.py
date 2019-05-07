@@ -9,6 +9,8 @@ import numpy as np
 import mysql.connector
 import json
 
+from utils import sql_utils
+
 def speech2text_cortana(msg):
     speak = wincl.Dispatch("SAPI.SpVoice")
     speak.Speak(msg)
@@ -28,7 +30,9 @@ def speak_cortana(name):
     return False
 
 if __name__ == "__main__":
+    sql_utils.delete_mysql_table()
     print("Listening..")
+    spoken_names = set()
     while True:
         conn =  mysql.connector.connect(
                 host="localhost",
@@ -48,6 +52,11 @@ if __name__ == "__main__":
 
             if difference < 20:
                 name = row["Name"]
-                speak_cortana(name)
+                if name not in spoken_names:
+                    #speak_cortana(name)
+                    msg = name + ", bienvenido"
+                    speech2text_cortana(msg)
+                    spoken_names.add(name)
+                    print(msg)
 
         conn.close()

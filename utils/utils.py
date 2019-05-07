@@ -56,7 +56,7 @@ def draw_box(img, label, dist, box):
 
         cv2.putText(img, text, (x,y), font_type, font_scale, (255,255,255), thickness)
         # cv2.putText(img, text, (x,y), font_type, font_scale, (255,255,255), 1)
-        img = draw_logo(img, label, x+x_text+15, y-y_text-10, 60, 41)
+        # img = draw_logo(img, label, x+x_text+15, y-y_text-10, 60, 41)
     return img
 
 def get_wide_box(w, h, xmin, ymin, xmax, ymax):
