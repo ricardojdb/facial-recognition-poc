@@ -49,7 +49,7 @@ class KnnModel(object):
         """
         dist, label = self.model.kneighbors([embed])
         dist, label = dist[0,0], label[0,0]
-        if dist > 1:
+        if dist > 0.8:
             label = "Unknown"
         else:
             label = self.label_encoder[label]
@@ -72,7 +72,8 @@ class KnnModel(object):
             A json response that contains the output
             from the pre-trained model.
         """
-        preds = requests.get(f'http://{self.vgg_host}/predict/', params={"data":data}).json()["embedding"]
+        preds = requests.get(f'http://{self.vgg_host}/predict/', 
+                             params={"data":data}).json()["embedding"]
         dist, label = self.who_is_it(preds)
         label = re.sub('[0-9]', '', label)
         out = {'label':label, 'dist':'{:.3f}'.format(dist)}

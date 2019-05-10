@@ -1,39 +1,30 @@
 from threading import Thread
+from datetime import datetime
 
+import win32com.client as wincl
 import numpy as np
+
 import traceback
 import base64
 import cv2
 import sys
-import os 
+import os
+import re
 
-global logos
+def speech2text_cortana(msg):
+    speak = wincl.Dispatch("SAPI.SpVoice")
+    speak.Speak(msg)
 
-logos = [cv2.imread("C:\\Users\\rdiazbri\\Documents\\proyectos\\facial-recognition-poc\\logos\\everis.png")]
-name2logo = {"Ricardo Diaz": 0, 
-             "Jose Sosa": 0, 
-             "Hugo Castro": 0, 
-             "Jaspers": 0}
+def speak_name(name, firstSeen, lastSeen):
+    first_seen = datetime.strptime(firstSeen, '%d/%m/%y %H:%M:%S')
+    last_seen = datetime.strptime(lastSeen, '%d/%m/%y %H:%M:%S')
 
-def draw_logo(img, label, logo_x, logo_y, logo_w, logo_h):
-    logo_id = name2logo.get(label, None)
-    if logo_id is None:
-        return img
-    logo = logos[logo_id]
-    if logo is None:
-        return img
-    logo = cv2.resize(logo, (logo_w , logo_h))
+    difference = (last_seen-first_seen).seconds
 
-    logo_gray = cv2.cvtColor(logo,cv2.COLOR_BGR2GRAY)
-    mask = (logo_gray<100)
-
-    logo_ymin = int(logo_y+2)
-    logo_xmin = int(logo_x-5)
-    true_h,true_w, _ = img[logo_ymin:logo_ymin+logo_h, logo_xmin:logo_xmin+logo_w].shape
-    img[logo_ymin:logo_ymin+logo_h, logo_xmin:logo_xmin+logo_w] *= np.expand_dims(mask[:true_h,:true_w],-1)
-    img[logo_ymin:logo_ymin+logo_h, logo_xmin:logo_xmin+logo_w] += logo[:true_h,:true_w]
-
-    return img
+    if difference < 20:
+        #speak_cortana(name)
+        msg = name + ", bienvenido"
+        speech2text_cortana(msg)
 
 def draw_box(img, label, dist, box):
     x,y,w,h = box
@@ -55,8 +46,7 @@ def draw_box(img, label, dist, box):
         cv2.rectangle(img, (x,y), (x+x_text, y-y_text), box_color, -1)
 
         cv2.putText(img, text, (x,y), font_type, font_scale, (255,255,255), thickness)
-        # cv2.putText(img, text, (x,y), font_type, font_scale, (255,255,255), 1)
-        # img = draw_logo(img, label, x+x_text+15, y-y_text-10, 60, 41)
+
     return img
 
 def get_wide_box(w, h, xmin, ymin, xmax, ymax):
@@ -81,7 +71,8 @@ def get_photos(base_path):
         if path.endswith("jpg") or path.endswith("png") or path.endswith("jpeg"):
             image_path = os.path.join(base_path, path)
             encoded_image = base64.b64encode(open(image_path, 'rb').read()).decode('utf-8')
-            photos[path[:-4]] = encoded_image
+            name = re.sub("[0-9]", "", path[:-4])
+            photos[name] = encoded_image
             
     return photos
 
@@ -90,13 +81,15 @@ class WebcamVideoStream:
         # initialize the video camera stream and read the first frame from the stream
         self.stream = cv2.VideoCapture(src)
         # Change depending on the resolution of the camera
-        self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, 1920) 
-        self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+        self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, 1280) # 1280
+        self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, 720) # 720
+        self.stream.set(cv2.CAP_PROP_FPS, 60) # 720
+        
         self.h = self.stream.get(4)
         self.w =self.stream.get(3)
         (self.grabbed, self.frame) = self.stream.read()
 
-        self.data_list = None
+        self.data_list = []
         # initialize the variable used to indicate if the thread should be stopped
         self.stopped = False
 
@@ -109,6 +102,8 @@ class WebcamVideoStream:
  
     def update(self):
         cv2.namedWindow('final_image', cv2.WINDOW_NORMAL)
+        # cv2.namedWindow('final_image', cv2.WND_PROP_FULLSCREEN)
+        # cv2.setWindowProperty("final_image", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         # keep looping infinitely until the thread is stopped
         while True:
             try:
@@ -131,7 +126,7 @@ class WebcamVideoStream:
                     cv2.destroyAllWindows()
                     return
 
-                if self.data_list != None:
+                if len(self.data_list) > 0:
                     for data in self.data_list:                        
                         img = draw_box(img, data[0], data[1], data[2])
 

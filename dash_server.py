@@ -30,8 +30,8 @@ def generate_html_table(df):
                 row = html.Td(
                         html.Img(
                         src="data:image/png;base64,{0}".format(df.iloc[i][col]), 
-                        width="50", 
-                        height="50"),
+                        width="120", 
+                        height="120"),
                         className="table-row center")
                 rows.append(row)
             else:
@@ -55,9 +55,14 @@ def update_metrics(n):
         host="localhost",
         user="admin",
         passwd="admin",
-        database="facedb",
-    )
-    df = pd.read_sql("SELECT Name, FirstSeen, max(LastSeen) as LastSeen FROM recognition GROUP BY Name ORDER BY LastSeen desc", conn)
+        database="facedb")
+        
+    df = pd.read_sql(
+        "SELECT Name, FirstSeen, max(LastSeen) as LastSeen "
+        "FROM facedb.recognition "
+        "GROUP BY Name "
+        "ORDER BY LastSeen desc", conn)
+
     df["Photo"] = df["Name"].map(lambda x: photos[x])
     
     conn.close()

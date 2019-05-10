@@ -21,9 +21,26 @@ def insert_mysql_table(data_list):
         database="facedb",
     ) 
     c = conn.cursor()
-    for data in data_list:
-        c.execute("INSERT INTO recognition (Name, FirstSeen, LastSeen) VALUES (%s,%s,%s)", [str(x) for x in data])
-        conn.commit()
+    c.execute("INSERT INTO recognition (Name, FirstSeen, LastSeen) "
+              "VALUES (%s,%s,%s)", [str(x) for x in data_list])
+    conn.commit()
+
+    conn.close()
+
+def update_mysql_table(name, last_seen):
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="admin",
+        passwd="admin",
+        database="facedb",
+    ) 
+    c = conn.cursor()
+    # Update single record 
+    sql_update_query = """UPDATE recognition 
+                          SET LastSeen = '{}' 
+                          WHERE Name = '{}'""".format(last_seen, name)
+    c.execute(sql_update_query)
+    conn.commit()
 
     conn.close()
 
