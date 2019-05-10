@@ -7,7 +7,7 @@ services:
       context: ./detection
       dockerfile: Dockerfile-gpu
     ports:
-    - "7001:7000"
+    - "7000:7000"
     volumes:
     - ./detection:/app
     runtime: nvidia
@@ -28,7 +28,7 @@ services:
     container_name: knn-service
     build: ./knn
     ports:
-     - "7000:7000"
+     - "7002:7000"
     volumes:
      - ./knn:/app
     networks:
