@@ -1,8 +1,8 @@
 version: '2.3'
 services:
 
-  detection:
-    container_name: detection-service
+  detection_gpu:
+    container_name: detection_gpu-service
     build: 
       context: ./detection
       dockerfile: Dockerfile-gpu
