@@ -1,12 +1,13 @@
 from sklearn.neighbors import KNeighborsClassifier
 from tqdm import tqdm
 
-import numpy as np 
+import numpy as np
 import requests
 import base64
-import pickle 
+import pickle
 import cv2
 import os
+
 
 def encode_img(img):
     _, buffer = cv2.imencode('.jpg', img)
@@ -23,11 +24,14 @@ i = 0
 for img_path in tqdm(os.listdir("images/")):
     img = cv2.imread(os.path.join("images/", img_path))
 
-    if img is None: continue  
+    if img is None:
+        continue
 
     img_str = encode_img(img)
-    r = requests.get(f"http://{host}:7001/predict/", 
-            params={"data":img_str}, timeout=5)
+    r = requests.post(
+        url=f"http://{host}:7001/predict/",
+        data=img_str,
+        timeout=5)
     r_json = r.json()
     embed = r_json["embedding"]
 

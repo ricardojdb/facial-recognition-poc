@@ -5,14 +5,14 @@ import utils
 # Initialize the flask app
 app = Flask(__name__)
 
-# Loads the given model 
+# Loads the given model
 knn = utils.KnnModel("models/", "172.28.0.2:7000")
 
-# The model runs in the /predict route
-@app.route('/predict/',methods=['GET','POST'])
+
+@app.route('/predict/', methods=['POST'])
 def predict():
     # Obtain the data from the request
-    data = request.args.get('data')
+    data = request.get_data()
     # Runs the model and returns the outputs in a json format
     output = knn.model_predict(data)
     return output

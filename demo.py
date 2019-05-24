@@ -30,33 +30,35 @@ spoken_names = set()
 while True:
     # collect width and height from the stream
     h, w = int(video_capture.h), int(video_capture.w)
-    
+
     # read the current frame
     ret, frame = video_capture.read()
 
     if not ret:
         break
-        
+
     img = np.copy(frame)
-    
+
     # Call Face detection API
     try:
-        detect_req = requests.get(f'http://{host}:7000/predict/', 
-            params={"data":utils.encode_img(img)}, timeout=5)
+        detect_req = requests.post(
+            url=f'http://{host}:7000/predict/',
+            data=utils.encode_img(img),
+            timeout=5)
         detections = detect_req.json()
     except:
         detections = []
-    
+
     data = []
     for face in detections:
         # extract the confidence associated with the prediction
         confidence = face["confidence"]
-        
-        # filter out weak detections by ensuring the `confidence` is 
+
+        # filter out weak detections by ensuring the `confidence` is
         # greater than the minimum confidence
         if confidence > 0.3:
             # compute the (x, y)-coordinates of the bounding box for the object
-            box =  face["box"] * np.array([w, h, w, h])
+            box = face["box"] * np.array([w, h, w, h])
             (xmin, ymin, xmax, ymax) = box.astype("int")
 
             # Widen the box so we can capture the whole face
@@ -67,14 +69,16 @@ while True:
             roi_color = frame[ymin_wide:ymax_wide, xmin_wide:xmax_wide]
 
             # if no face is detected conitnue to the next one
-            if not roi_color.size: continue
+            if not roi_color.size:
+                continue
 
             # encode image to base64
             img_str = utils.encode_img(roi_color)
 
             # send the image in the data param
-            r = requests.get(f'http://{host}:7002/predict/', 
-                             params={"data":img_str})
+            r = requests.post(
+                url=f'http://{host}:7002/predict/',
+                params={"data": img_str})
 
             # extract json output
             outputs = dict(r.json())
@@ -82,13 +86,14 @@ while True:
             # gather the data that's going to be passed to
             # the WebcamVideoStream to plot the bounding box
             data.append([
-                outputs['label'], 
-                outputs['dist'], 
-                (xmin,ymin,xmax-xmin,ymax-ymin)])
-            
+                outputs['label'],
+                outputs['dist'],
+                (xmin, ymin, xmax-xmin, ymax-ymin)])
+
             # if label is Unknown don't add the data to the MySQL database
-            if outputs['label'] == "Unknown": continue
-            
+            if outputs['label'] == "Unknown":
+                continue
+
             # create or update the data in the recognition dict
             if outputs['label'] in recog_dict:
                 last_seen = datetime.now().strftime('%d/%m/%y %H:%M:%S')
@@ -102,17 +107,16 @@ while True:
             if outputs['label'] not in spoken_names:
                 processThread = threading.Thread(
                     target=utils.speak_name,
-                    args=(outputs['label'], 
-                    recog_dict[outputs['label']][1], 
-                    recog_dict[outputs['label']][2]))
+                    args=(outputs['label'],
+                          recog_dict[outputs['label']][1],
+                          recog_dict[outputs['label']][2]))
 
                 processThread.start()
                 spoken_names.add(outputs['label'])
-    
-    
+
     video_capture.data_list = data
-        
+
     if video_capture.stopped:
         break
 
-cv2.destroyAllWindows()        
+cv2.destroyAllWindows()

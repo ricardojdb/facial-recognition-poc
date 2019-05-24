@@ -4,10 +4,9 @@ import requests
 import pickle
 import base64
 import json
-import os 
+import os
 import re
 
-global device
 
 class KnnModel(object):
     def __init__(self, models_path, vgg_host):
@@ -15,7 +14,7 @@ class KnnModel(object):
         self.models_path = models_path
         self.model = self.init_model("knn.pkl")
         self.label_encoder = self.init_model("id2label.pkl")
-    
+
     def init_model(self, model_name):
         """
         Initializes the machine learning model.
@@ -31,7 +30,7 @@ class KnnModel(object):
 
     def who_is_it(self, embed):
         """
-        Performs the identity search 
+        Performs the identity search
         using the pre-trained knn model
 
         Parameters
@@ -42,23 +41,23 @@ class KnnModel(object):
         Returns
         -------
         dist: float
-            distance between the given and 
+            distance between the given and
             the target embedding.
         label: str
             Name of the predicted identity.
         """
         dist, label = self.model.kneighbors([embed])
-        dist, label = dist[0,0], label[0,0]
+        dist, label = dist[0, 0], label[0, 0]
         if dist > 0.8:
             label = "Unknown"
         else:
             label = self.label_encoder[label]
-        return dist, label 
+        return dist, label
 
     def model_predict(self, data):
         """
-        Decodes and preprocess the data, uses the 
-        pretrained model to make predictions and 
+        Decodes and preprocess the data, uses the
+        pretrained model to make predictions and
         returns a well formatted json output.
 
         Parameters
@@ -72,10 +71,11 @@ class KnnModel(object):
             A json response that contains the output
             from the pre-trained model.
         """
-        preds = requests.get(f'http://{self.vgg_host}/predict/', 
-                             params={"data":data}).json()["embedding"]
+        preds = requests.post(
+            url=f'http://{self.vgg_host}/predict/',
+            data=data).json()["embedding"]
         dist, label = self.who_is_it(preds)
         label = re.sub('[0-9]', '', label)
-        out = {'label':label, 'dist':'{:.3f}'.format(dist)}
+        out = {'label': label, 'dist': '{:.3f}'.format(dist)}
 
         return json.dumps(out)
